@@ -81,17 +81,17 @@ namespace GalacticEmpire.Tests
         [Fact]
         public async Task Assert_GetRebelsAsync()
         {
-            // Agrega un habitante rebelde de prueba
+            // Add new rebel for test
             _context.Habitants.Add(new Habitant { Id = 4, Name = "Leia Organa", IdSpecie = 1, IdPlanetOfOrigin = 1, IsRebel = true });
             await _context.SaveChangesAsync();
 
-            // Obtiene los rebeldes a través del repositorio
-            List<Habitant> rebels = (List<Habitant>)await _repo.GetRebelsAsync(); // Asegúrate de que GetRebelsAsync esté implementado en el repositorio
+            // All rebels from repository
+            List<Habitant> rebels = (List<Habitant>)await _repo.GetRebelsAsync();
 
-            // Verifica que la lista de rebeldes no esté vacía
+            // List Rebels is not empty
             Assert.NotEmpty(rebels);
 
-            // Verifica que el primer rebelde en la lista es realmente un rebelde
+            // first rebel of list is true rebel
             Assert.True(rebels.FirstOrDefault().IsRebel);
         }
     }
