@@ -16,153 +16,83 @@ namespace GalacticEmpire.Tests
 {
     public class HabitantRepositoryTests
     {
-        // This test checks if GetAllHabitants() in the HabitantController returns an Ok response with a list of habitants
-        [Fact]
-        public async Task GetAllHabitants_ShouldReturnOkWithHabitants()
+        private readonly HabitantRepository _repo;
+        private readonly GalacticEmpireContext _context;
+
+        public HabitantRepositoryTests()
         {
-            // Arrange: Set up the necessary components for the test
-            // We create a mock (fake) implementation of the IHabitantRepository
-            var mockRepo = new Mock<IHabitantRepository>();
-
-            // Define some dummy data to simulate database data
-            var dummyHabitants = new List<Habitant>
-        {
-            new Habitant { Id = 1, Name = "Luke Skywalker", IsRebel = true },
-            new Habitant { Id = 2, Name = "Han Solo", IsRebel = true }
-        };
-
-            // Set up the mock repository to return the dummy data when GetAllHabitantsAsync() is called
-            mockRepo.Setup(repo => repo.GetAllHabitantsAsync())
-                    .ReturnsAsync(dummyHabitants);
-
-            // Now we create the controller, passing the mocked repository as a dependency
-            var controller = new HabitantController(mockRepo.Object);
-
-            // Act: Call the method we are testing
-            var result = await controller.GetAllHabitants();
-
-            // Assert: Verify the results
-            // Check that the result is of type OkObjectResult (HTTP 200 OK)
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-
-            // Check that the returned data is the list of habitants we defined earlier
-            var returnedHabitants = Assert.IsType<List<Habitant>>(okResult.Value);
-
-            // Finally, check that the returned list has the correct number of habitants (2 in this case)
-            Assert.Equal(2, returnedHabitants.Count);
+            _context = new GalacticEmpireContext(new DbContextOptionsBuilder<GalacticEmpireContext>()
+                .UseInMemoryDatabase(databaseName: "GalacticEmpireDB")
+                .Options);
+            _repo = new HabitantRepository(_context);
         }
 
-        // This test checks if GetHabitantById() returns NotFound when an invalid ID is provided
         [Fact]
-        public async Task GetHabitantById_InvalidId_ShouldReturnNotFound()
+        public async Task Assert_GetHabitantsAsync()
         {
-            // Arrange: Set up the mock repository
-            var mockRepo = new Mock<IHabitantRepository>();
-
-            // Mock repository to return null when an invalid ID is passed
-            mockRepo.Setup(repo => repo.GetHabitantByIdAsync(It.IsAny<int>()))
-                    .ReturnsAsync((Habitant)null); // Simulates "not found" behavior
-
-            // Create controller
-            var controller = new HabitantController(mockRepo.Object);
-
-            // Act: Call the method with an invalid ID (e.g., 999)
-            var result = await controller.GetHabitantById(999);
-
-            // Assert: Check that the result is a NotFoundResult (HTTP 404)
-            Assert.IsType<NotFoundResult>(result.Result);
+            _context.Habitants.Add(new Habitant { Id = 2, Name = "C-3PO", IsRebel = false });
+            await _context.SaveChangesAsync();
+            List<Habitant> habitants = (List<Habitant>)await _repo.GetAllHabitantsAsync();
+            Assert.NotEmpty(habitants);
+            Assert.IsType<Habitant>(habitants.FirstOrDefault());
         }
 
-        // This test checks if GetHabitantById() returns Ok when a valid ID is provided
         [Fact]
-        public async Task GetHabitantById_ValidId_ShouldReturnOkWithHabitant()
+        public async Task Assert_GetSpeciesAsync()
         {
-            // Arrange: Set up the mock repository
-            var mockRepo = new Mock<IHabitantRepository>();
-
-            // Define a dummy habitant that will be returned when a valid ID is passed
-            var dummyHabitant = new Habitant { Id = 1, Name = "Luke Skywalker", IsRebel = true };
-
-            // Set up the mock repository to return the dummy habitant when called with ID 1
-            mockRepo.Setup(repo => repo.GetHabitantByIdAsync(1))
-                    .ReturnsAsync(dummyHabitant);
-
-            // Create controller
-            var controller = new HabitantController(mockRepo.Object);
-
-            // Act: Call the method with a valid ID (1 in this case)
-            var result = await controller.GetHabitantById(1);
-
-            // Assert: Check that the result is of type OkObjectResult (HTTP 200 OK)
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-
-            // Verify that the returned value is the habitant we defined earlier
-            var returnedHabitant = Assert.IsType<Habitant>(okResult.Value);
-            Assert.Equal("Luke Skywalker", returnedHabitant.Name);
+            _context.Species.Add(new Specie { IdSpecie = 1, Name = "Human" });
+            await _context.SaveChangesAsync();
+            List<Specie> species = await _repo.GetSpeciesAsync();
+            Assert.NotEmpty(species);
+            Assert.IsType<Specie>(species.FirstOrDefault());
         }
 
-        // This test checks if AddHabitant() adds a new habitant and returns a CreatedAtAction result
         [Fact]
-        public async Task AddHabitant_ShouldReturnCreatedAtAction()
+        public async Task Assert_GetPlanetsAsync()
         {
-            // Arrange: Set up the mock repository
-            var mockRepo = new Mock<IHabitantRepository>();
-
-            // Define a dummy habitant to be added
-            var newHabitant = new Habitant { Id = 3, Name = "Leia Organa", IsRebel = true };
-
-            // Set up the mock repository so that AddHabitantAsync does nothing (since we are mocking)
-            mockRepo.Setup(repo => repo.AddHabitantAsync(It.IsAny<Habitant>()))
-                    .Returns(Task.CompletedTask); // Simulates a successful insert
-
-            // Create controller
-            var controller = new HabitantController(mockRepo.Object);
-
-            // Act: Call the method to add the new habitant
-            var result = await controller.AddHabitant(newHabitant);
-
-            // Assert: Check that the result is a CreatedAtActionResult (HTTP 201)
-            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
-
-            // Verify that the newly added habitant's name is "Leia Organa"
-            var addedHabitant = Assert.IsType<Habitant>(createdAtActionResult.Value);
-            Assert.Equal("Leia Organa", addedHabitant.Name);
-
-            // Ensure that the repository's AddHabitantAsync method was called once with the new habitant
-            mockRepo.Verify(repo => repo.AddHabitantAsync(It.IsAny<Habitant>()), Times.Once);
+            _context.Planets.AddRange(new Planet { IdPlanet = 1, Name = "Tatooine" });
+            await _context.SaveChangesAsync();
+            List<Planet> planets = await _repo.GetPlanetsAsync();
+            Assert.NotEmpty(planets);
+            Assert.IsType<Planet>(planets.FirstOrDefault());
         }
 
-        // This test checks if GetRebels() returns only rebels
         [Fact]
-        public async Task GetRebels_ShouldReturnOnlyRebels()
+        public async Task Assert_CreateHabitantAsync()
         {
-            // Arrange: Set up the mock repository
-            var mockRepo = new Mock<IHabitantRepository>();
+            Habitant habitant = new Habitant { Name = "Luke Skywalker", IsRebel = true };
+            await _repo.AddHabitantAsync(habitant);
+            Habitant habitantFromDb = await _context.Habitants.FirstOrDefaultAsync(h => h.Name == "Luke Skywalker");
+            Assert.NotNull(habitantFromDb);
+            Assert.Equal(habitant.Name, habitantFromDb.Name);
+        }
 
-            // Define a list of habitants, some rebels and some not
-            var dummyHabitants = new List<Habitant>
+
+        [Fact]
+        public async Task Assert_FindHabitantAsync()
         {
-            new Habitant { Id = 1, Name = "Luke Skywalker", IsRebel = true },
-            new Habitant { Id = 2, Name = "Darth Vader", IsRebel = false },
-            new Habitant { Id = 3, Name = "Leia Organa", IsRebel = true }
-        };
+            _context.Habitants.Add(new Habitant { Id = 3, Name = "Yoda2", IsRebel = true });
+            await _context.SaveChangesAsync();
+            Habitant habitant = await _repo.GetHabitantByIdAsync(3);
+            Assert.NotNull(habitant);
+            Assert.Equal("Yoda2", habitant.Name);
+        }
 
-            // Mock the repository to return only rebels when GetRebelsAsync is called
-            mockRepo.Setup(repo => repo.GetRebelsAsync())
-                    .ReturnsAsync(dummyHabitants.Where(h => h.IsRebel).ToList());
+        [Fact]
+        public async Task Assert_GetRebelsAsync()
+        {
+            // Agrega un habitante rebelde de prueba
+            _context.Habitants.Add(new Habitant { Id = 4, Name = "Leia Organa", IdSpecie = 1, IdPlanetOfOrigin = 1, IsRebel = true });
+            await _context.SaveChangesAsync();
 
-            // Create controller
-            var controller = new HabitantController(mockRepo.Object);
+            // Obtiene los rebeldes a través del repositorio
+            List<Habitant> rebels = (List<Habitant>)await _repo.GetRebelsAsync(); // Asegúrate de que GetRebelsAsync esté implementado en el repositorio
 
-            // Act: Call the method to get rebels
-            var result = await controller.GetRebels();
+            // Verifica que la lista de rebeldes no esté vacía
+            Assert.NotEmpty(rebels);
 
-            // Assert: Check that the result is an OkObjectResult (HTTP 200)
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-
-            // Verify that only the rebels are returned
-            var returnedRebels = Assert.IsType<List<Habitant>>(okResult.Value);
-            Assert.Equal(2, returnedRebels.Count); // Should return 2 rebels
+            // Verifica que el primer rebelde en la lista es realmente un rebelde
+            Assert.True(rebels.FirstOrDefault().IsRebel);
         }
     }
 }

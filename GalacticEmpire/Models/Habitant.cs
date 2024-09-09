@@ -14,7 +14,7 @@ namespace GalacticEmpire.Models
         [Column("IdSpecie")]
         public int IdSpecie { get; set; }
         [Column("IdPlanet")]
-        public int IsPlanetOfOrigin { get; set; }
+        public int IdPlanetOfOrigin { get; set; }
         
         [Column("IsRebel")]
         public bool IsRebel { get; set; }
