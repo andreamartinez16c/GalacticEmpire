@@ -1,14 +1,13 @@
-﻿using GalacticEmpire.Models;
+﻿using GalacticEmpire.Models.DTOs;
+using GalacticEmpire.Models.Entities;
 
 namespace GalacticEmpire.Repositories
 {
-    public interface IHabitantRepository
+    public interface IHabitantRepository : IRepository<HabitantDto>
     {
-        Task<IEnumerable<Habitant>> GetAllHabitantsAsync();
-        Task<Habitant> GetHabitantByIdAsync(int id);
-        Task AddHabitantAsync(Habitant habitant);
-        Task<IEnumerable<Habitant>> GetRebelsAsync();
-        Task<List<Planet>> GetPlanetsAsync();
-        Task<List<Specie>> GetSpeciesAsync();
+        Task<HabitantDto> GetHabitantByNameAsync(string name);
+        Task<IEnumerable<HabitantDto>> GetHabitantsByPlanetNameAsync(string planetName); // Habitants X Planet
+        Task<IEnumerable<HabitantDto>> GetHabitantsBySpecieNameAsync(string specieName); // Habitants X Specie
+        Task<IEnumerable<HabitantDto>> GetRebelsAsync();
     }
 }

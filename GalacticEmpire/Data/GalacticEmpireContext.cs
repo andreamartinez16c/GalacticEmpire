@@ -1,4 +1,4 @@
-﻿using GalacticEmpire.Models;
+﻿using GalacticEmpire.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GalacticEmpire.Data

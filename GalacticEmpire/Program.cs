@@ -6,12 +6,19 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-string connectionString = builder.Configuration.GetConnectionString("GalacticEmpireDB");
+string connectionString = builder.Configuration.GetConnectionString("GalacticEmpireDBLocal");
+//string connectionString = builder.Configuration.GetConnectionString("GalacticEmpireDBLocal");
 builder.Services.AddTransient<IHabitantRepository, HabitantRepository>();
+builder.Services.AddTransient<ISpecieRepository, SpecieRepository>();
+builder.Services.AddTransient<IPlanetRepository, PlanetRepository>();
 builder.Services.AddDbContext<GalacticEmpireContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddControllers();
+
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

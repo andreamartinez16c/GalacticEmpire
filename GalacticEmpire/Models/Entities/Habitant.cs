@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GalacticEmpire.Models
+namespace GalacticEmpire.Models.Entities
 {
     [Table("Habitants")]
     public class Habitant
@@ -15,7 +15,7 @@ namespace GalacticEmpire.Models
         public int IdSpecie { get; set; }
         [Column("IdPlanet")]
         public int IdPlanetOfOrigin { get; set; }
-        
+
         [Column("IsRebel")]
         public bool IsRebel { get; set; }
     }

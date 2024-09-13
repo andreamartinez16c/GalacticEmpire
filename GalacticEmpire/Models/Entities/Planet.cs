@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace GalacticEmpire.Models
+namespace GalacticEmpire.Models.Entities
 {
-    [Table("Species")]
-    public class Specie
+    [Table("Planets")]
+    public class Planet
     {
         [Key]
-        [Column("IdSpecie")]
-        public int IdSpecie { get; set; }
+        [Column("IdPlanet")]
+        public int IdPlanet { get; set; }
 
         [Column("Name")]
         public string Name { get; set; }
